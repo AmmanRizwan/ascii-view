@@ -151,9 +151,17 @@ image_t make_grayscale(image_t* original) {
     for (size_t y = 0; y < height; y++) {
         for (size_t x = 0; x < width; x++) {
             double* pixel = get_pixel(original, x, y);
-
-            // Luminance-weighted graycsale. Could be a callback...
-            double grayscale = 0.2126 * pixel[0] + 0.7152 * pixel[1] + 0.0722 * pixel[2];
+            double grayscale;
+            if (original->channels == 1) {
+                grayscale = pixel[0];  // Already grayscale
+            } else if (original->channels >= 3) {
+                // Luminance-weighted graycsale. Could be a callback...
+                grayscale = 0.2126 * pixel[0] + 0.7152 * pixel[1] + 0.0722 * pixel[2];
+            } else {
+                fprintf(stderr, "Unsupported channel count: %zu\n", original->channels);
+                free(data);
+                return (image_t){0};
+            }
 
             set_pixel(&new, x, y, &grayscale);
         }
